@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+ .line1 {
+        fill: none;
+        stroke: #ffa81e;
+   stroke-width: 2px;
+  }
+   
+ .line2 {
+        fill: none;
+        stroke: #cc4e00;
+   stroke-width: 2px;
+  }
+  .line3 {
+        fill: none;
+        stroke: #00d161;
+   stroke-width: 2px;
+  }
+   .line4 {
+        fill: none;
+        stroke: #29c5f9;
+   stroke-width: 2px;
+  }
+   .line5 {
+        fill: none;
+        stroke: #4377f8;
+   stroke-width: 2px;
+  }
+  
+.zoom {
+  cursor: move;
+  fill: none;
+  pointer-events: all;
+}
+
+</style>
+<script src="legend.js"></script>
+<svg width="960" height="500"></svg>
+<script src="https://d3js.org/d3.v4.min.js"></script>
+<script>
+
+var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 110, left: 40},
+    margin2 = {top: 430, right: 20, bottom: 30, left: 40},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    height2 = +svg.attr("height") - margin2.top - margin2.bottom;
+
+
+var x = d3.scaleLinear().range([0, width]),
+    x2 = d3.scaleLinear().range([0, width]),
+    y = d3.scaleLinear().range([height, 0]);
+  	y2 = d3.scaleLinear().range([height2, 0]);
+
+
+var xAxis = d3.axisBottom(x),
+    xAxis2 = d3.axisBottom(x2),
+    yAxis = d3.axisLeft(y);
+
+var brush = d3.brushX()
+    .extent([[0, 0], [width, height2]])
+    .on("brush end", brushed);
+
+var zoom = d3.zoom()
+    .scaleExtent([1, Infinity])
+    .translateExtent([[0, 0], [width, height]])
+    .extent([[0, 0], [width, height]])
+    .on("zoom", zoomed);
+
+    var line1 = d3.line()
+        .x(function (d) { return x(d.original_count); })
+        .y(function (d) { return y(d.MCAS); });
+
+    var line1a = d3.line()
+        .x(function (d) { return x2(d.original_count); })
+        .y(function (d) { return y2(d.MCAS); });
+  
+  	var line2 = d3.line()
+        .x(function (d) { return x(d.original_count); })
+        .y(function (d) { return y(d.correct); });
+  
+  	var line2a = d3.line()
+        .x(function (d) { return x2(d.original_count); })
+        .y(function (d) { return y2(d.correct); });
+  
+  	var line3 = d3.line()
+        .x(function (d) { return x(d.original_count); })
+        .y(function (d) { return y(d.DA_avg_time); });
+  
+  	var line3a = d3.line()
+        .x(function (d) { return x2(d.original_count); })
+        .y(function (d) { return y2(d.DA_avg_time); });
+  
+  	var line4 = d3.line()
+        .x(function (d) { return x(d.original_count); })
+        .y(function (d) { return y(d.DA_avg_attempt); });
+  
+  	var line4a = d3.line()
+        .x(function (d) { return x2(d.original_count); })
+        .y(function (d) { return y2(d.DA_avg_attempt); });
+  
+  	var line5 = d3.line()
+        .x(function (d) { return x(d.original_count); })
+        .y(function (d) { return y(d.DA_avg_hint); });
+  
+  	var line5a = d3.line()
+        .x(function (d) { return x2(d.original_count); })
+        .y(function (d) { return y2(d.DA_avg_hint); });
+
+    var clip = svg.append("defs").append("svg:clipPath")
+        .attr("id", "clip")
+        .append("svg:rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("x", 0)
+        .attr("y", 0); 
+	
+//legend 
+//  const colorValue = d => d.estimated_temp;
+//      const colorLabel = 'Temperature (C)';
+  
+//  const g = svg.append('g')
+//          .attr('transform', `translate(${margin.left},${margin.top})`);
+  
+//  const xAxisG = g.append('g')
+//          .attr('transform', `translate(0, ${innerHeight})`);
+//      const yAxisG = g.append('g');
+//  const colorLegendG = g.append('g')
+//          .attr('transform', `translate(${innerWidth + 60}, 150)`);
+//  colorLegendG.append('text')
+//          .attr('class', 'legend-label')
+//          .attr('x', -30)
+//          .attr('y', -40)
+//          .text(colorLabel);
+//other legend
+//   function legendDemo() {
+
+//  sampleCategoricalData = ["Correct","MCAS", "Time", "Attempts", "Hints"]
+//  sampleOrdinal = d3.scale.category20().domain(sampleCategoricalData);
+
+//  verticalLegend = d3.svg.legend().labelFormat("none").cellPadding(5).orientation("vertical").units("Things in a List").cellWidth(25).cellHeight(18).inputScale(sampleOrdinal).cellStepping(10);
+
+//  d3.select("svg").append("g").attr("transform", "translate(50,140)").attr("class", "legend").call(verticalLegend);
+
+//  }
+//creating line variables
+    var Line_chart1 = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("clip-path", "url(#clip)");
+
+    var Line_chart2 = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("clip-path", "url(#clip)");
+  
+  	var Line_chart3 = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("clip-path", "url(#clip)");
+  
+  	var Line_chart4 = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("clip-path", "url(#clip)");
+  
+  	var Line_chart5 = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+        .attr("clip-path", "url(#clip)");
+
+//focus and context for zooming
+    var focus = svg.append("g")
+        .attr("class", "focus")
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+		var context = svg.append("g")
+    		.attr("class", "context")
+    		.attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
+
+//getting data
+d3.csv("DataViz_MCAS.csv", type, function (error, data) {
+  if (error) throw error;
+
+  x.domain(d3.extent(data, function(d) { return d.original_count; }));
+ 	y.domain([0, d3.max(data, function (d) { return d.correct+1; })]);
+  x2.domain(x.domain());
+  y2.domain(y.domain());
+
+
+//functions
+    focus.append("g")
+        .attr("class", "axis axis--x")
+        .attr("transform", "translate(0," + height + ")")
+        .call(xAxis);
+
+    focus.append("g")
+        .attr("class", "axis axis--y")
+        .call(yAxis);
+
+    Line_chart1.append("path")
+        .datum(data)
+        .attr("class", "line1")
+        .attr("d", line1a);
+
+    context.append("path")
+        .datum(data)
+        .attr("class", "line1")
+        .attr("d", line1a);
+  	
+  	Line_chart2.append("path")
+        .datum(data)
+        .attr("class", "line2")
+        .attr("d", line2a);
+  
+  	context.append("path")
+        .datum(data)
+        .attr("class", "line2")
+        .attr("d", line2a);
+  
+  Line_chart3.append("path")
+        .datum(data)
+        .attr("class", "line3")
+        .attr("d", line3a);
+  
+  	context.append("path")
+        .datum(data)
+        .attr("class", "line3")
+        .attr("d", line3a);
+  
+  Line_chart4.append("path")
+        .datum(data)
+        .attr("class", "line4")
+        .attr("d", line4a);
+  
+  	context.append("path")
+        .datum(data)
+        .attr("class", "line4")
+        .attr("d", line4a);
+  
+  Line_chart5.append("path")
+        .datum(data)
+        .attr("class", "line5")
+        .attr("d", line5a);
+  
+  	context.append("path")
+        .datum(data)
+        .attr("class", "line5")
+        .attr("d", line5a);
+
+  	context.append("g")
+      .attr("class", "axis axis--x")
+      .attr("transform", "translate(0," + height2 + ")")
+      .call(xAxis2);
+
+  	context.append("g")
+      .attr("class", "brush")
+      .call(brush)
+      .call(brush.move, x.range());
+
+  svg.append("rect")
+      .attr("class", "zoom")
+      .attr("width", width)
+      .attr("height", height)
+      .attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+      .call(zoom);
+
+
+  console.log(data);
+});
+
+function brushed() {
+  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "zoom") return; // ignore brush-by-zoom
+  var s = d3.event.selection || x2.range();
+  x.domain(s.map(x2.invert, x2));
+  Line_chart1.select(".line1").attr("d", line1);
+  Line_chart2.select(".line2").attr("d", line2);
+  Line_chart3.select(".line3").attr("d", line3);
+  Line_chart4.select(".line4").attr("d", line4);
+  Line_chart5.select(".line5").attr("d", line5);
+  focus.select(".axis--x").call(xAxis);
+  svg.select(".zoom").call(zoom.transform, d3.zoomIdentity
+      .scale(width / (s[1] - s[0]))
+      .translate(-s[0], 0));
+}
+
+function zoomed() {
+  if (d3.event.sourceEvent && d3.event.sourceEvent.type === "brush") return; // ignore zoom-by-brush
+  var t = d3.event.transform;
+  x.domain(t.rescaleX(x2).domain());
+  Line_chart1.select(".line1").attr("d", line1);
+  Line_chart2.select(".line2").attr("d", line2);
+  Line_chart3.select(".line3").attr("d", line3);
+  Line_chart4.select(".line4").attr("d", line4);
+  Line_chart5.select(".line5").attr("d", line5);
+  focus.select(".axis--x").call(xAxis);
+  context.select(".brush").call(brush.move, x.range().map(t.invertX, t));
+}
+
+function type(d) {
+  d.original_count = +d.original_count;
+  d.correct = +d.correct;
+  d.MCAS = +d.MCAS;
+  d.DA_avg_time = +d.DA_avg_time;
+  d.DA_avg_attempt = +d.DA_avg_attempt;
+  d.DA_avg_hint = +d.DA_avg_hint;
+  return d;
+}
+  
+  //Text label for the X Axis
+    svg.append("text")
+            .attr("x", width/2)
+            .attr("y", height + height2+15)
+            .style("text-anchor", "middle")
+            .text("Number of Problems");
+  
+  //text for line labels
+  svg.append("text")
+ //           .attr("transform", "translate(" + (width+3) + "," + y(data.correct) + ")")
+            .attr ("dx", "3em")
+            .attr("dy", "8em")
+            .attr("text-anchor", "start")
+            .style("fill", "#cc4e00")
+            .text("Correctness");
+
+    svg.append("text")
+ //           .attr("transform", "translate(" + (width+3) + "," + y(data.MCAS) + ")")
+            .attr("dx", "3em")
+      			.attr("dy", "12em")
+            .attr("text-anchor", "start")
+            .style("fill", "#ffa81e")
+            .text("MCAS Score");
+ svg.append("text")
+ //           .attr("transform", "translate(" + (width+3) + "," + y(data.DA_avg_time) + ")")
+            .attr("dx", "3em")
+   					.attr("dy", "14.5em")
+            .attr("text-anchor", "start")
+            .style("fill", "#00d161")
+            .text("Time");
+  svg.append("text")
+ //           .attr("transform", "translate(" + (width+3) + "," + y(data.DA_avg_attempt) + ")")
+            .attr("dx", "3em")
+    				.attr("dy", "17.5em")
+            .attr("text-anchor", "start")
+            .style("fill", "#29c5f9")
+            .text("Errors");
+  svg.append("text")
+ //           .attr("transform", "translate(" + (width+3) + "," + y(data.DA_avg_hint) + ")")
+            .attr("dx", "3em")
+    				.attr("dy", "21.5em")
+            .attr("text-anchor", "start")
+            .style("fill", "#4377f8")
+            .text("Hints");
+  
+
+</script>
